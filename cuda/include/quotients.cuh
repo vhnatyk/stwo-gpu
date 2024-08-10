@@ -7,6 +7,8 @@
 
 const unsigned int BLOCK_SIZE = 1024;
 
+const point m31_circle_gen = {2, 1268011823};
+
 extern "C"
 void accumulate_quotients(
         uint32_t half_coset_initial_index,

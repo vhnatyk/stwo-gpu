@@ -14,7 +14,7 @@ typedef struct {
     qm31 y;
 } secure_field_point;
 
-const point m31_circle_gen = {2, 1268011823};
+// const point m31_circle_gen = {2, 1268011823};
 
 /*##### Point ##### */
 
@@ -55,7 +55,7 @@ __host__ __device__ __forceinline__ point point_neg(point &p) {
 }
 
 __host__ __forceinline__ point point_of_order(int n) {
-    point result = m31_circle_gen;
+    point result = {2, 1268011823}; //m31_circle_gen;
     int log_exponent = 31 - log_2(n);
     while (log_exponent > 0) {
         result = point_square(result);
