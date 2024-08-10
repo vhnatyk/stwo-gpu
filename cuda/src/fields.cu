@@ -76,6 +76,8 @@ __host__ __device__ cm31 mul_by_scalar(cm31 x, m31 scalar) {
 /*##### QM31 ##### */
 
 __host__ __device__ qm31 mul(qm31 x, qm31 y) {
+    const cm31 R = {2, 1}; //
+
     // Karatsuba multiplication
     cm31 v0 = mul(x.a, y.a);
     cm31 v1 = mul(x.b, y.b);

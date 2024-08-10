@@ -10,7 +10,8 @@ typedef struct {
 } column_sample_batch;
 
 __device__ point index_to_point(uint32_t index) {
-    return point_pow(m31_circle_gen, (int)index);
+    // return point_pow(m31_circle_gen, (int)index);
+    return point_pow({2, 1268011823}, (int)index);
 }
 
 __device__ point domain_at_index(uint32_t half_coset_initial_index, uint32_t half_coset_step_size, uint32_t index, uint32_t domain_size) {
