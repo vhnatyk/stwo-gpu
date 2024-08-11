@@ -26,3 +26,7 @@ harness = false
 [[bench]]
 name = "batch_inverse"
 harness = false
+
+[[bench]]
+name = "accumulate"
+harness = false
