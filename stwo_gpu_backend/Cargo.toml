@@ -30,3 +30,7 @@ harness = false
 [[bench]]
 name = "accumulate"
 harness = false
+
+[[bench]]
+name = "fibonacci"
+harness = false
