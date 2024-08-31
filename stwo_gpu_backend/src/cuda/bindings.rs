@@ -106,9 +106,11 @@ extern "C" {
     #[link_name = "free_uint32_t_vec"]
     fn free_uint32_t_vec_cuda(device_ptr: *const u32);
 
+    #[cfg(not(feature = "icicle_poc"))]
     #[link_name = "bit_reverse_base_field"]
     fn bit_reverse_base_field_cuda(array: *const u32, size: usize);
 
+    #[cfg(not(feature = "icicle_poc"))]
     #[link_name = "bit_reverse_secure_field"]
     fn bit_reverse_secure_field_cuda(array: *const u32, size: usize);
 
@@ -255,11 +257,10 @@ extern "C" {
         sample_column_values: *const CudaSecureField,
         sample_column_and_values_sizes: *const u32,
         sample_size: u32,
-        _column_0: *const u32,
-        _column_1: *const u32,
-        _column_2: *const u32,
-        _column_3: *const u32,
-        flattened_line_coeffs: *const u32,
+        result_column_0: *const u32,
+        result_column_1: *const u32,
+        result_column_2: *const u32,
+        result_column_3: *const u32,
         flattened_line_coeffs_size: u32,
     );
 
@@ -367,7 +368,26 @@ pub unsafe fn bit_reverse_base_field(array: *const u32, size: usize) {
         message = format!("called with size: {:?}", size)
     )
     .entered();
-    unsafe { bit_reverse_base_field_cuda(array, size) }
+
+    #[cfg(not(feature = "icicle_poc"))]
+    unsafe {
+        bit_reverse_base_field_cuda(array, size)
+    }
+
+    #[cfg(feature = "icicle_poc")]
+    unsafe {
+        use icicle_core::vec_ops::BitReverseConfig;
+
+        let cfg = BitReverseConfig::default();
+
+        use icicle_core::vec_ops::bit_reverse_inplace;
+        use icicle_m31::field::ScalarField;
+        use icicle_cuda_runtime::memory::DeviceSlice;
+        use std::slice;
+        let ptr = array as *mut ScalarField;
+        let rr = slice::from_raw_parts_mut(ptr, size);
+        bit_reverse_inplace::<ScalarField>(DeviceSlice::from_mut_slice(rr), &cfg).unwrap();
+    }
 }
 
 pub unsafe fn bit_reverse_secure_field(array: *const u32, size: usize) {
@@ -377,7 +397,25 @@ pub unsafe fn bit_reverse_secure_field(array: *const u32, size: usize) {
         message = format!("called with size: {:?}", size)
     )
     .entered();
-    unsafe { bit_reverse_secure_field_cuda(array, size) }
+    #[cfg(not(feature = "icicle_poc"))]
+    unsafe {
+        bit_reverse_secure_field_cuda(array, size)
+    }
+
+    #[cfg(feature = "icicle_poc")]
+    unsafe {
+        use icicle_core::vec_ops::BitReverseConfig;
+
+        let cfg = BitReverseConfig::default();
+
+        use icicle_core::vec_ops::bit_reverse_inplace;
+        use icicle_m31::field::ExtensionField;
+        use icicle_cuda_runtime::memory::DeviceSlice;
+        use std::slice;
+        let ptr = array as *mut ExtensionField;
+        let rr = slice::from_raw_parts_mut(ptr, size);
+        bit_reverse_inplace::<ExtensionField>(DeviceSlice::from_mut_slice(rr), &cfg).unwrap();
+    }
 }
 
 pub unsafe fn batch_inverse_base_field(from: *const u32, dst: *const u32, size: usize) {
@@ -696,10 +734,7 @@ pub unsafe fn accumulate_quotients(
     result_column_1: *const u32,
     result_column_2: *const u32,
     result_column_3: *const u32,
-    flattened_line_coeffs: *const u32,
     flattened_line_coeffs_size: u32,
-    line_coeffs_sizes: *const u32,
-    batch_random_coeffs: *const u32,
 ) {
     let _ = span!(
         Level::INFO,
@@ -728,10 +763,7 @@ pub unsafe fn accumulate_quotients(
             result_column_1,
             result_column_2,
             result_column_3,
-            flattened_line_coeffs,
             flattened_line_coeffs_size,
-            line_coeffs_sizes,
-            batch_random_coeffs,
         );
     }
 }
