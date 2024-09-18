@@ -1,16 +1,18 @@
 mod accumulation;
 pub mod backend;
+mod blake2s;
 mod column;
 pub mod cuda;
 mod field;
 mod fri;
+mod lookups;
 mod poly;
 mod quotient;
 mod secure_column;
-mod blake2s;
-pub mod examples;
 
 pub use backend::CudaBackend;
+
+pub mod examples;
 
 #[cfg(test)]
 mod tests {

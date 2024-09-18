@@ -4,6 +4,7 @@ use stwo_prover::core::{
     fields::{m31::BaseField, qm31::SecureField},
 };
 use tracing::{info, span, Level};
+use std::ffi::c_void;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -36,9 +37,9 @@ impl From<SecureField> for CudaSecureField {
     }
 }
 
-impl Into<SecureField> for CudaSecureField {
-    fn into(self) -> SecureField {
-        SecureField::from_m31(self.a, self.b, self.c, self.d)
+impl From<CudaSecureField> for SecureField{
+    fn from(value: CudaSecureField) -> Self {
+        SecureField::from_m31(value.a, value.b, value.c, value.d)
     }
 }
 
@@ -106,6 +107,8 @@ extern "C" {
     #[link_name = "free_uint32_t_vec"]
     fn free_uint32_t_vec_cuda(device_ptr: *const u32);
 
+    pub fn cuda_free_memory(device_ptr: *const c_void);
+
     #[cfg(not(feature = "icicle_poc"))]
     #[link_name = "bit_reverse_base_field"]
     fn bit_reverse_base_field_cuda(array: *const u32, size: usize);
@@ -149,6 +152,15 @@ extern "C" {
         twiddles_tree: *const u32,
         twiddle_tree_size: u32,
         values_size: u32,
+    );
+
+    pub fn interpolate_columns(
+        eval_domain_size: u32,
+        values: *const *const u32,
+        inverse_twiddles_tree: *const u32,
+        inverse_twiddle_tree_size: u32,
+        values_size: u32,
+        number_of_rows: u32,
     );
 
     #[link_name = "eval_at_point"]
@@ -277,6 +289,28 @@ extern "C" {
         step_point: CirclePointBaseField,
         random_coeff_0: CudaSecureField,
         random_coeff_1: CudaSecureField,
+    );
+
+    pub fn gen_eq_evals(
+        v: CudaSecureField,
+        y: *const CudaSecureField,
+        y_size: u32,
+        evals: *const CudaSecureField,
+        evals_size: u32,
+    );
+
+    pub fn fix_first_variable_base_field(
+        evals: *const u32,
+        evals_size: usize,
+        assignment: CudaSecureField,
+        output_evals: *const u32,
+    );
+
+    pub fn fix_first_variable_secure_field(
+        evals: *const u32,
+        evals_size: usize,
+        assignment: CudaSecureField,
+        output_evals: *const u32,
     );
 }
 
