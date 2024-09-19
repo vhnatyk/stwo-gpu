@@ -1,4 +1,4 @@
-#include "../include/fields.cuh"
+#include "fields.cuh"
 
 __host__ __device__ m31 mul(m31 a, m31 b) {
     uint64_t v = ((uint64_t) a * (uint64_t) b);
@@ -49,6 +49,12 @@ __host__ __device__ cm31 add(cm31 x, cm31 y) {
     return {add(x.a, y.a), add(x.b, y.b)};
 }
 
+__host__ __device__ cm31 add(m31 x, cm31 y) {
+    return {
+            add(x, y.a),
+            y.b,
+    };}
+
 __host__ __device__ cm31 mul(m31 x, cm31 y) {
     return {
             mul(x, y.a),
@@ -58,6 +64,10 @@ __host__ __device__ cm31 mul(m31 x, cm31 y) {
 
 __host__ __device__ cm31 sub(cm31 x, cm31 y) {
     return {sub(x.a, y.a), sub(x.b, y.b)};
+}
+
+__host__ __device__ cm31 sub(m31 x, cm31 y) {
+    return {sub(x, y.a), neg(y.b)};
 }
 
 __host__ __device__ cm31 neg(cm31 x) {
@@ -104,8 +114,19 @@ __host__ __device__ qm31 add(qm31 x, qm31 y) {
     return {add(x.a, y.a), add(x.b, y.b)};
 }
 
+__host__ __device__ qm31 add(m31 x, qm31 y) {
+    return {
+            add(x, y.a),
+            y.b,
+    };
+}
+
 __host__ __device__ qm31 sub(qm31 x, qm31 y) {
     return {sub(x.a, y.a), sub(x.b, y.b)};
+}
+
+__host__ __device__ qm31 sub(m31 x, qm31 y) {
+    return {sub(x, y.a), neg(y.b)};
 }
 
 __host__ __device__ qm31 mul_by_scalar(qm31 x, m31 scalar) {

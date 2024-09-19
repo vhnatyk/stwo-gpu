@@ -1,8 +1,9 @@
+use stwo_prover::core::vcs::blake2_hash::Blake2sHash;
 use stwo_prover::core::{
     circle::CirclePoint,
     fields::{m31::BaseField, qm31::SecureField},
 };
-use stwo_prover::core::vcs::blake2_hash::Blake2sHash;
+use std::ffi::c_void;
 
 #[repr(C)]
 pub struct CudaSecureField {
@@ -26,17 +27,17 @@ impl CudaSecureField {
 impl From<SecureField> for CudaSecureField {
     fn from(value: SecureField) -> Self {
         Self {
-            a: value.0.0,
-            b: value.0.1,
-            c: value.1.0,
-            d: value.1.1,
+            a: value.0 .0,
+            b: value.0 .1,
+            c: value.1 .0,
+            d: value.1 .1,
         }
     }
 }
 
-impl Into<SecureField> for CudaSecureField {
-    fn into(self) -> SecureField {
-        SecureField::from_m31(self.a, self.b, self.c, self.d)
+impl From<CudaSecureField> for SecureField{
+    fn from(value: CudaSecureField) -> Self {
+        SecureField::from_m31(value.a, value.b, value.c, value.d)
     }
 }
 
@@ -95,7 +96,7 @@ extern "C" {
 
     pub fn cuda_alloc_zeroes_blake_2s_hash(size: usize) -> *const Blake2sHash;
 
-    pub fn free_uint32_t_vec(device_ptr: *const u32);
+    pub fn cuda_free_memory(device_ptr: *const c_void);
 
     pub fn bit_reverse_base_field(array: *const u32, size: usize);
 
@@ -122,6 +123,15 @@ extern "C" {
         inverse_twiddles_tree: *const u32,
         inverse_twiddle_tree_size: u32,
         values_size: u32,
+    );
+
+    pub fn interpolate_columns(
+        eval_domain_size: u32,
+        values: *const *const u32,
+        inverse_twiddles_tree: *const u32,
+        inverse_twiddle_tree_size: u32,
+        values_size: u32,
+        number_of_rows: u32,
     );
 
     pub fn evaluate(
@@ -157,18 +167,7 @@ extern "C" {
         folded_values: *const *const u32,
     );
 
-    pub fn decompose(
-        columns: *const *const u32,
-        column_size: u32,
-        lambda: &CudaSecureField,
-        g_values: *const *const u32,
-    );
-
-    pub fn accumulate(
-        size: u32,
-        left_columns: *const *const u32,
-        right_columns: *const *const u32,
-    );
+    pub fn accumulate(size: u32, left_columns: *const *const u32, right_columns: *const *const u32);
 
     pub fn commit_on_first_layer(
         size: usize,
@@ -202,18 +201,10 @@ extern "C" {
         size: usize,
     );
 
-    pub fn free_blake_2s_hash_vec(
-        device_pointer: *const Blake2sHash,
-    );
-
     pub fn copy_device_pointer_vec_from_host_to_device(
         from: *const *const u32,
         size: usize,
     ) -> *const *const u32;
-
-    pub fn free_device_pointer_vec(
-        device_pointer: *const *const u32,
-    );
 
     pub fn accumulate_quotients(
         half_coset_initial_index: u32,
@@ -235,17 +226,25 @@ extern "C" {
         flattened_line_coeffs_size: u32,
     );
 
-    pub fn fibonacci_component_evaluate_constraint_quotients_on_domain(
-        evals: *const u32,
+    pub fn gen_eq_evals(
+        v: CudaSecureField,
+        y: *const CudaSecureField,
+        y_size: u32,
+        evals: *const CudaSecureField,
         evals_size: u32,
-        output_column_0: *const u32,
-        output_column_1: *const u32,
-        output_column_2: *const u32,
-        output_column_3: *const u32,
-        claim_value: BaseField,
-        initial_point: CirclePointBaseField,
-        step_point: CirclePointBaseField,
-        random_coeff_0: CudaSecureField,
-        random_coeff_1: CudaSecureField,
+    );
+
+    pub fn fix_first_variable_base_field(
+        evals: *const u32,
+        evals_size: usize,
+        assignment: CudaSecureField,
+        output_evals: *const u32,
+    );
+
+    pub fn fix_first_variable_secure_field(
+        evals: *const u32,
+        evals_size: usize,
+        assignment: CudaSecureField,
+        output_evals: *const u32,
     );
 }
