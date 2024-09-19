@@ -6,8 +6,8 @@ use super::bindings;
 
 #[derive(Debug)]
 pub struct BaseFieldVec {
-    pub(crate) device_ptr: *const u32,
-    pub(crate) size: usize,
+    pub device_ptr: *const u32,
+    pub size: usize,
 }
 unsafe impl Send for BaseFieldVec {}
 unsafe impl Sync for BaseFieldVec {}

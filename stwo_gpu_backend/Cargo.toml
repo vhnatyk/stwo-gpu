@@ -41,3 +41,7 @@ harness = false
 [[bench]]
 name = "accumulate"
 harness = false
+
+[[bench]]
+name = "ntt"
+harness = false
