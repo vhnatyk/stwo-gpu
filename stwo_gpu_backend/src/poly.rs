@@ -283,8 +283,10 @@ mod tests {
 
     #[test]
     fn test_evaluate() {
+        use std::time::Instant;
+        use tracing::info;
+        
         let log_size = 20;
-
         let size = 1 << log_size;
 
         let cpu_values = (1..(size + 1) as u32)
@@ -299,11 +301,29 @@ mod tests {
         let cpu_twiddles = CpuBackend::precompute_twiddles(coset.half_coset());
         let gpu_twiddles = CudaBackend::precompute_twiddles(coset.half_coset());
 
+        // Measure CPU interpolate time
+        let start = Instant::now();
         let cpu_poly = CpuBackend::interpolate(cpu_evaluations, &cpu_twiddles);
-        let gpu_poly = CudaBackend::interpolate(gpu_evaluations, &gpu_twiddles);
+        let cpu_interpolate_time = start.elapsed();
+        info!("CPU interpolate time: {:?}", cpu_interpolate_time);
 
+        // Measure GPU interpolate time
+        let start = Instant::now();
+        let gpu_poly = CudaBackend::interpolate(gpu_evaluations, &gpu_twiddles);
+        let gpu_interpolate_time = start.elapsed();
+        info!("GPU interpolate time: {:?}", gpu_interpolate_time);
+
+        // Measure CPU evaluate time
+        let start = Instant::now();
         let expected_result = CpuBackend::evaluate(&cpu_poly, coset.circle_domain(), &cpu_twiddles);
+        let cpu_evaluate_time = start.elapsed();
+        info!("CPU evaluate time: {:?}", cpu_evaluate_time);
+
+        // Measure GPU evaluate time
+        let start = Instant::now();
         let result = CudaBackend::evaluate(&gpu_poly, coset.circle_domain(), &gpu_twiddles);
+        let gpu_evaluate_time = start.elapsed();
+        info!("GPU evaluate time: {:?}", gpu_evaluate_time);
 
         assert_eq!(result.values.to_cpu(), expected_result.values);
     }
