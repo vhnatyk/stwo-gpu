@@ -3,7 +3,7 @@ use stwo_prover::core::{
     circle::CirclePoint,
     fields::{m31::BaseField, qm31::SecureField},
 };
-use tracing::{info, span, Level};
+use tracing::{info, span, trace, Level};
 use std::ffi::c_void;
 
 #[repr(C)]
@@ -322,7 +322,7 @@ pub unsafe fn copy_uint32_t_vec_from_device_to_host(
     size: u32,
 ) {
     let _ = span!(
-        Level::INFO,
+        Level::TRACE,
         " <<<TO HOST==: copy_uint32_t_vec_from_device_to_host",
         message = format!("called with size: {:?}", size)
     )
@@ -334,7 +334,7 @@ pub unsafe fn copy_uint32_t_vec_from_device_to_host(
 
 pub unsafe fn copy_uint32_t_vec_from_host_to_device(host_ptr: *const u32, size: u32) -> *const u32 {
     let _ = span!(
-        Level::INFO,
+        Level::TRACE,
         " ==TO DEVICE>>: copy_uint32_t_vec_from_host_to_device",
         message = format!("called with size: {:?}", size)
     )
@@ -348,7 +348,7 @@ pub unsafe fn copy_uint32_t_vec_from_device_to_device(
     size: u32,
 ) -> *const u32 {
     let _ = span!(
-        Level::INFO,
+        Level::TRACE,
         "==DtoD==: copy_uint32_t_vec_from_device_to_device",
         message = format!("called with size: {:?}", size)
     )
@@ -357,7 +357,7 @@ pub unsafe fn copy_uint32_t_vec_from_device_to_device(
 }
 
 pub unsafe fn cuda_malloc_uint32_t(size: u32) -> *const u32 {
-    info!(
+    trace!(
         target = "cuda_malloc_uint32_t",
         message = format!("called with size: {:?}", size)
     );
