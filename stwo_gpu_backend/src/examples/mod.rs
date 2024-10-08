@@ -21,8 +21,8 @@ use crate::CudaBackend;
 pub type WideFibonacciComponentCuda<const N: usize> = FrameworkComponent<WideFibonacciEvalCuda<N>>;
 
 pub struct FibInput {
-    a: PackedBaseField,
-    b: PackedBaseField,
+    pub a: PackedBaseField,
+    pub b: PackedBaseField,
 }
 
 /// A component that enforces the Fibonacci sequence.

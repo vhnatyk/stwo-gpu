@@ -163,6 +163,15 @@ extern "C" {
         number_of_rows: u32,
     );
 
+    pub fn evaluate_columns(
+        eval_domain_sizes: *const u32,
+        values: *const *const u32,
+        twiddles_tree: *const u32,
+        twiddle_tree_size: u32,
+        number_of_columns: u32,
+        column_sizes: *const u32,
+    );
+
     #[link_name = "eval_at_point"]
     fn eval_at_point_cuda(
         coeffs: *const u32,

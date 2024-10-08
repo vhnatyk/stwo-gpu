@@ -6,7 +6,8 @@ edition = "2021"
 [dependencies]
 cc = "1.0"
 # stwo-prover = { git = "https://github.com/starkware-libs/stwo", rev = "eacd4f0" }
-stwo-prover = { git = "https://github.com/schouhy/stwo", rev = "97ae01" }
+# stwo-prover = { git = "https://github.com/schouhy/stwo", rev = "97ae01" }
+stwo-prover = { git = "https://github.com/jarnesino/stwo", rev = "4f6542e" }
 # stwo-prover = { path= "/mnt/c/proj/stwo/crates/prover"}
 icicle-cuda-runtime = { git = "https://github.com/ingonyama-zk/icicle.git", optional = true, rev="33cf8550"}
 icicle-core = { git = "https://github.com/ingonyama-zk/icicle.git", optional = true, rev="33cf8550"}
@@ -30,6 +31,8 @@ cmake = "0.1.50"
 default = []
 icicle_poc = ["icicle-cuda-runtime", "icicle-core", "icicle-m31"]
 
+# *** Benches ***
+
 [[bench]]
 name = "bit_reverse"
 harness = false
@@ -42,6 +45,18 @@ harness = false
 name = "accumulate"
 harness = false
 
+# [[bench]]
+# name = "fibonacci"
+# harness = false
+
 [[bench]]
 name = "ntt"
+harness = false
+
+[[bench]]
+name = "interpolate_columns"
+harness = false
+
+[[bench]]
+name = "evaluate_columns"
 harness = false
