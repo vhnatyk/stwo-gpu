@@ -34,9 +34,9 @@ harness = false
 name = "accumulate"
 harness = false
 
-[[bench]]
-name = "fibonacci"
-harness = false
+# [[bench]]
+# name = "fibonacci"
+# harness = false
 
 [[bench]]
 name = "interpolate_columns"
