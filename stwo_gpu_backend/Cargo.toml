@@ -45,12 +45,12 @@ harness = false
 name = "accumulate"
 harness = false
 
-# [[bench]]
-# name = "fibonacci"
-# harness = false
-
 [[bench]]
 name = "ntt"
+harness = false
+
+[[bench]]
+name = "fibonacci"
 harness = false
 
 [[bench]]

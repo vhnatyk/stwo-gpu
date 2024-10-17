@@ -3,7 +3,7 @@ use stwo_prover::core::{
     fields::{m31::BaseField, qm31::SecureField},
     lookups::{
         gkr_prover::GkrOps,
-        mle::{Mle, MleOps},
+        mle::Mle,
     },
 };
 use crate::cuda::{bindings, SecureFieldVec};
