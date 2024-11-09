@@ -45,7 +45,7 @@ impl From<CudaSecureField> for SecureField {
 }
 
 #[repr(C)]
-pub(crate) struct CirclePointBaseField {
+pub struct CirclePointBaseField {
     x: BaseField,
     y: BaseField,
 }
@@ -110,11 +110,11 @@ extern "C" {
 
     pub fn cuda_free_memory(device_ptr: *const c_void);
 
-    #[cfg(not(feature = "icicle_poc"))]
+    #[cfg(not(feature = "icicle"))]
     #[link_name = "bit_reverse_base_field"]
     fn bit_reverse_base_field_cuda(array: *const u32, size: usize);
 
-    #[cfg(not(feature = "icicle_poc"))]
+    #[cfg(not(feature = "icicle"))]
     #[link_name = "bit_reverse_secure_field"]
     fn bit_reverse_secure_field_cuda(array: *const u32, size: usize);
 
@@ -425,12 +425,12 @@ pub unsafe fn bit_reverse_base_field(array: *const u32, size: usize) {
     )
     .entered();
 
-    #[cfg(not(feature = "icicle_poc"))]
+    #[cfg(not(feature = "icicle"))]
     unsafe {
         bit_reverse_base_field_cuda(array, size)
     }
 
-    #[cfg(feature = "icicle_poc")]
+    #[cfg(feature = "icicle")]
     unsafe {
         use icicle_core::vec_ops::BitReverseConfig;
 
@@ -453,12 +453,12 @@ pub unsafe fn bit_reverse_secure_field(array: *const u32, size: usize) {
         message = format!("called with size: {:?}", size)
     )
     .entered();
-    #[cfg(not(feature = "icicle_poc"))]
+    #[cfg(not(feature = "icicle"))]
     unsafe {
         bit_reverse_secure_field_cuda(array, size)
     }
 
-    #[cfg(feature = "icicle_poc")]
+    #[cfg(feature = "icicle")]
     unsafe {
         use icicle_core::vec_ops::BitReverseConfig;
 

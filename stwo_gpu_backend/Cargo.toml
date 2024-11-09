@@ -26,7 +26,7 @@ cmake = "0.1.50"
 
 [features]
 default = []
-icicle_poc = ["icicle-cuda-runtime", "icicle-core", "icicle-m31"]
+icicle = ["icicle-cuda-runtime", "icicle-core", "icicle-m31"]
 
 # *** Benches ***
 
