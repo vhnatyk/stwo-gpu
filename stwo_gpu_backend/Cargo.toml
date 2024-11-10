@@ -57,3 +57,7 @@ harness = false
 [[bench]]
 name = "evaluate_columns"
 harness = false
+
+[[bench]]
+name = "fri"
+harness = false
