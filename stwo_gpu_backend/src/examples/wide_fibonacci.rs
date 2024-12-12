@@ -205,10 +205,9 @@ mod test {
     #[test]
     fn test_cuda_constraints_for_wide_fib_prove() {
         // Note: To see time measurement, run test with
-        //   RUST_LOG_SPAN_EVENTS=enter,close RUST_LOG=info RUST_BACKTRACE=1
-        //   RUSTFLAGS="-Awarnings -C target-cpu=native -C target-feature=+avx2 -C opt-level=3"
-        //   cargo test test_cuda_constraints_for_wide_fib_prove -- --nocapture
-        const LOG_N_INSTANCES: u32 = 16;
+        //   RUST_LOG_SPAN_EVENTS=enter,close RUST_LOG=info RUST_BACKTRACE=1 RUSTFLAGS="-Awarnings -C target-cpu=native -C target-feature=+avx2 -C opt-level=3" cargo test test_cuda_constraints_for_wide_fib_prove -- --nocapture
+        const LOG_N_INSTANCES: u32 = 18;
+        println!("proving wide fib for 2^{:?}...", LOG_N_INSTANCES);
 
         let config = PcsConfig::default();
 
@@ -237,9 +236,15 @@ mod test {
             log_n_instances: LOG_N_INSTANCES,
         };
 
+        let start = std::time::Instant::now();
         let proof =
             prove::<CudaBackend, _>(&[&component], prover_channel, commitment_scheme).unwrap();
-
+        
+        println!(
+            "proving for 2^{:?} took {:?} ms",
+            LOG_N_INSTANCES,
+            start.elapsed().as_millis()
+        );
         // Verify.
         let verifier_channel = &mut Blake2sChannel::default();
         let commitment_scheme = &mut CommitmentSchemeVerifier::<Blake2sMerkleChannel>::new(config);
