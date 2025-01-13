@@ -163,6 +163,15 @@ mod test {
 
     use super::{Input, WideFibComponent, N_COLUMNS};
 
+    use std::{fmt::Display, str::FromStr};
+
+    pub fn get_env_var<T: Display + FromStr>(key: &str, default: T) -> T {
+        std::env::var(key)
+            .unwrap_or_else(|_| default.to_string())
+            .parse()
+            .unwrap_or(default)
+    }
+
     /// Generates the trace for the wide Fibonacci example.
     fn generate_test_trace(
         log_n_instances: u32,
@@ -202,50 +211,60 @@ mod test {
         }
     }
 
-    #[test_log::test]
+    #[test]
     fn test_cuda_constraints_for_wide_fib_prove() {
         // Note: To see time measurement, run test with
-        //   RUST_LOG_SPAN_EVENTS=enter,close RUST_LOG=info RUST_BACKTRACE=1
-        //   RUSTFLAGS="-Awarnings -C target-cpu=native -C target-feature=+avx2 -C opt-level=3"
-        //   cargo test test_cuda_constraints_for_wide_fib_prove -- --nocapture
-        const LOG_N_INSTANCES: u32 = 16;
+        //   RUST_LOG_SPAN_EVENTS=enter,close RUST_LOG=info RUST_BACKTRACE=1 RUSTFLAGS="-Awarnings -C target-cpu=native -C target-feature=+avx2 -C opt-level=3" cargo test test_cuda_constraints_for_wide_fib_prove -- --nocapture
+        let min_log = get_env_var("MIN_FIB_LOG", 12u32);
+        let max_log = get_env_var("MAX_FIB_LOG", 21u32);
 
-        let config = PcsConfig::default();
+        for log_n_instances in min_log..=max_log {
+            println!("proving wide fib for 2^{:?}...", log_n_instances);
 
-        // Precompute twiddles.
-        let twiddles = CudaBackend::precompute_twiddles(
-            CanonicCoset::new(LOG_N_INSTANCES + 1 + config.fri_config.log_blowup_factor)
-                .circle_domain()
-                .half_coset,
-        );
+            let config = PcsConfig::default();
 
-        // Setup protocol.
-        let prover_channel = &mut Blake2sChannel::default();
-        let commitment_scheme =
-            &mut CommitmentSchemeProver::<CudaBackend, Blake2sMerkleChannel>::new(
-                config, &twiddles,
+            // Precompute twiddles.
+            let twiddles = CudaBackend::precompute_twiddles(
+                CanonicCoset::new(log_n_instances + 1 + config.fri_config.log_blowup_factor)
+                    .circle_domain()
+                    .half_coset,
             );
 
-        // Trace.
-        let trace = generate_test_trace(LOG_N_INSTANCES);
-        let mut tree_builder = commitment_scheme.tree_builder();
-        tree_builder.extend_evals(trace);
-        tree_builder.commit(prover_channel);
+            // Setup protocol.
+            let prover_channel = &mut Blake2sChannel::default();
+            let commitment_scheme =
+                &mut CommitmentSchemeProver::<CudaBackend, Blake2sMerkleChannel>::new(
+                    config, &twiddles,
+                );
 
-        let component = WideFibComponent {
-            log_fibonacci_size: LOG_N_COLUMNS as u32,
-            log_n_instances: LOG_N_INSTANCES,
-        };
+            // Trace.
+            let trace = generate_test_trace(log_n_instances);
+            let mut tree_builder = commitment_scheme.tree_builder();
+            tree_builder.extend_evals(trace);
+            tree_builder.commit(prover_channel);
 
-        let proof =
-            prove::<CudaBackend, _>(&[&component], prover_channel, commitment_scheme).unwrap();
+            let component = WideFibComponent {
+                log_fibonacci_size: LOG_N_COLUMNS as u32,
+                log_n_instances: log_n_instances,
+            };
 
-        // Verify.
-        let verifier_channel = &mut Blake2sChannel::default();
-        let commitment_scheme = &mut CommitmentSchemeVerifier::<Blake2sMerkleChannel>::new(config);
+            let start = std::time::Instant::now();
+            let proof =
+                prove::<CudaBackend, _>(&[&component], prover_channel, commitment_scheme).unwrap();
 
-        let sizes = component.trace_log_degree_bounds();
-        commitment_scheme.commit(proof.commitments[0], &sizes[0], verifier_channel);
-        verify(&[&component], verifier_channel, commitment_scheme, proof).unwrap();
+            println!(
+                "proving for 2^{:?} took {:?} ms",
+                log_n_instances,
+                start.elapsed().as_millis()
+            );
+            // Verify.
+            let verifier_channel = &mut Blake2sChannel::default();
+            let commitment_scheme =
+                &mut CommitmentSchemeVerifier::<Blake2sMerkleChannel>::new(config);
+
+            let sizes = component.trace_log_degree_bounds();
+            commitment_scheme.commit(proof.commitments[0], &sizes[0], verifier_channel);
+            verify(&[&component], verifier_channel, commitment_scheme, proof).unwrap();
+        }
     }
 }
