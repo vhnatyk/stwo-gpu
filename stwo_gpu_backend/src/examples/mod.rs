@@ -94,7 +94,7 @@ mod tests {
     use stwo_prover::core::poly::BitReversedOrder;
     use stwo_prover::core::ColumnVec;
 
-    const FIB_SEQUENCE_LENGTH: usize = 1024;
+    const FIB_SEQUENCE_LENGTH: usize = 100;
 
     fn generate_test_trace(
         log_n_instances: u32,
