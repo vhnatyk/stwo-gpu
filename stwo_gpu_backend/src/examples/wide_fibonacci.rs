@@ -219,7 +219,7 @@ mod test {
         let max_log = get_env_var("MAX_FIB_LOG", 21u32);
 
         for log_n_instances in min_log..=max_log {
-            println!("proving wide fib for 2^{:?}...", log_n_instances);
+            println!("stwo-gpu proving wide fib for 2^{:?}...", log_n_instances);
 
             let config = PcsConfig::default();
 
@@ -253,7 +253,7 @@ mod test {
                 prove::<CudaBackend, _>(&[&component], prover_channel, commitment_scheme).unwrap();
 
             println!(
-                "proving for 2^{:?} took {:?} ms",
+                "stwo-gpu proving for 2^{:?} took {:?} ms",
                 log_n_instances,
                 start.elapsed().as_millis()
             );
