@@ -61,3 +61,11 @@ harness = false
 [[bench]]
 name = "fri"
 harness = false
+
+[[bench]]
+name = "quotients"
+harness = false
+
+[[bench]]
+name = "eval_at_point"
+harness = false
